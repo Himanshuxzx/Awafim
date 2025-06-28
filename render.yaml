@@ -2,6 +2,6 @@ services:
   - type: web
     name: awafim
     env: node
+    plan: free
     buildCommand: npm install
     startCommand: npm start
-    plan: free

@@ -1,28 +1,28 @@
 const express = require('express');
 const axios = require('axios');
-const serverless = require('serverless-http');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// ✅ MKV URL extraction logic (modify if your server uses different patterns)
+// ✅ MKV URL extraction logic
 function extractMkvUrlFromText(text) {
   const mkvRegex = /(https?:\/\/[^\s"']+\.mkv[^\s"']*)/i;
   const match = text.match(mkvRegex);
   return match ? match[1] : null;
 }
 
-// 🔹 Fetch URL and return response as text
+// 🔹 Fetch raw HTML/text from a URL
 async function fetchRawText(url) {
   const response = await axios.get(url, {
-    responseType: 'text', // ensure plain text, not JSON
+    responseType: 'text',
     headers: {
-      'User-Agent': 'Mozilla/5.0', // helps prevent 403 errors
+      'User-Agent': 'Mozilla/5.0',
     },
   });
   return typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
 }
 
-// 🔹 Format response to stream structure
+// 🔹 Format output
 function buildResponse(mkvUrl) {
   return {
     streams: [
@@ -35,7 +35,7 @@ function buildResponse(mkvUrl) {
   };
 }
 
-// ✅ MOVIE endpoint
+// ✅ Movie endpoint
 app.get('/movie/:id', async (req, res) => {
   const { id } = req.params;
   const targetUrl = `https://hahoy.server.arlen.icu/glint/${id}`;
@@ -54,7 +54,7 @@ app.get('/movie/:id', async (req, res) => {
   }
 });
 
-// ✅ TV endpoint
+// ✅ TV episode endpoint
 app.get('/tv/:id/:season/:episode', async (req, res) => {
   const { id, season, episode } = req.params;
   const targetUrl = `https://hahoy.server.arlen.icu/glint/${id}/${season}/${episode}`;
@@ -73,4 +73,7 @@ app.get('/tv/:id/:season/:episode', async (req, res) => {
   }
 });
 
-module.exports.handler = serverless(app);
+// ✅ Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});
